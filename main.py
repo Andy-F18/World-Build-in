@@ -48,16 +48,16 @@ class WolrdBuildIn:
         self.__root.config(menu=menu)
 
     def __menu_h(self):
-        f_menue = tk.Frame(self.__root, background=self.colors['menu1'])
+        f_menu = tk.Frame(self.__root, background=self.colors['menu1'])
         w = int(self.size['w']/7.1)//4
 
-        b_chara = tk.Button(f_menue, text="Character", relief='flat', width=w, command=self.__charPage,
+        b_chara = tk.Button(f_menu, text="Character", relief='flat', width=w, command=self.__charPage,
                             background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_place = tk.Button(f_menue, text="Locations", relief='flat', width=w, command=self.__placePage,
+        b_place = tk.Button(f_menu, text="Locations", relief='flat', width=w, command=self.__placePage,
                             background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_items = tk.Button(f_menue, text="Items", relief='flat', width=w, command=self.__itemPage,
+        b_items = tk.Button(f_menu, text="Items", relief='flat', width=w, command=self.__itemPage,
                             background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_story = tk.Button(f_menue, text="Story", relief='flat', width=w,command=self.__storyPage,
+        b_story = tk.Button(f_menu, text="Story", relief='flat', width=w, command=self.__storyPage,
                             background=self.colors['menu1'], activebackground=self.colors['menu2'])
 
         self.__import_file = tk.StringVar()
@@ -66,7 +66,7 @@ class WolrdBuildIn:
         b_items.grid(column=2, row=0)
         b_story.grid(column=3, row=0)
 
-        f_menue.pack(anchor="w")
+        f_menu.pack(anchor="w")
 
     def __charPage(self):
         self.__currentFrame.destroy()
