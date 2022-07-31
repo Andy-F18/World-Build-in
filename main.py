@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+from tkinter import filedialog
 
 
 class WolrdBuildIn:
@@ -29,13 +30,17 @@ class WolrdBuildIn:
         self.__currentFrame = tk.Frame(self.__root)
         self.__currentFrame.pack()
 
+        self.worldName = tk.StringVar()
+        self.workDir = tk.StringVar()
+        self.workDir.set(os.path.abspath(".")+'\\Projects')
+
         self.__root.mainloop()
 
     def __menu_p(self):
         menu = tk.Menu(self.__root)
 
         fileMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
-        fileMenu.add_command(label='New world')
+        fileMenu.add_command(label='New world', command=self.__new)
         fileMenu.add_command(label='Open world')
         fileMenu.add_command(label='Save')
         fileMenu.add_command(label='Save as')
@@ -67,6 +72,42 @@ class WolrdBuildIn:
         b_story.grid(column=3, row=0)
 
         f_menu.pack(anchor="w")
+
+    def __new(self):
+        new = tk.Toplevel()
+        new.title("New World")
+        w = 500
+        h = 150
+        new.configure(background=self.colors["bg1"])
+        pR = int(new.winfo_screenwidth() / 2 - w / 2)
+        pD = int(new.winfo_screenheight() / 2 - h / 2 - 100)
+        new.geometry("{}x{}+{}+{}".format(w, h, pR, pD))
+
+        f_new = tk.Frame(new, background=self.colors['bg1'])
+        # #################### BEGIN WORLD NAME FRAME ####################
+        f_name = tk.Frame(f_new, background=self.colors['bg1'])
+        tk.Label(f_name, text='Name :', background=self.colors['bg1']).grid(column=0, row=0)
+        tk.Entry(f_name, textvariable=self.worldName, width=25).grid(column=1, row=0, padx=5)
+        f_name.pack()
+        # #################### END WORLD NAME FRAME ####################
+
+        # #################### BEGIN WORk PATH FRAME ####################
+        f_path = tk.Frame(f_new, background=self.colors['bg1'])
+        tk.Label(f_path, text='Path :', background=self.colors['bg1']).grid(column=0, row=0)
+        tk.Entry(f_path, textvariable=self.workDir, width=50).grid(column=1, row=0, padx=5)
+        tk.Button(f_path, text='...', command=self.__browseFiles).grid(column=2, row=0)
+        f_path.pack(pady=10)
+        # #################### END WORK PATH FRAME ####################
+        tk.Button(f_new, text='OK', command=new.destroy).pack()
+        f_new.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        new.grab_set()
+        self.__root.wait_window(new)
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get())
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Characters")
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Locations")
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Items")
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Story")
 
     def __charPage(self):
         self.__currentFrame.destroy()
@@ -111,6 +152,17 @@ class WolrdBuildIn:
 
         storyFrame.pack()
         self.__currentFrame = storyFrame
+
+    def __browseFiles(self):
+        rep = os.path.abspath(os.getcwd())
+        filename_s = tk.filedialog.askdirectory(initialdir=rep,
+                                                title="Select a Rep")
+        if filename_s != "":
+            filename = filename_s
+        else:
+            filename = self.workDir.get()
+        # Change label contents
+        self.workDir.set(filename)
 
 
 if __name__ == '__main__':
