@@ -1,13 +1,14 @@
 import tkinter as tk
 import os
 from tkinter import filedialog
+from Frames import Character as ch
 
 
 class WolrdBuildIn:
     def __init__(self):
         # #################### BEGIN INIT VARS ####################
         self.size = {'h': 700, 'w': 1300}
-        self.colors = {'bg1': '#ccc', 'menu1': '#555555', 'menu2': '#666666'}
+        self.colors = {'bg1': '#ccc', 'bg2': "#555", 'menu1': '#555555', 'menu2': '#666666'}
         # #################### END INIT VARS ####################
 
         try:
@@ -111,14 +112,20 @@ class WolrdBuildIn:
 
     def __charPage(self):
         self.__currentFrame.destroy()
-        charFrame = tk.Frame(self.__root, background=self.colors['bg1'])
+        frame = tk.Frame(self.__root, background=self.colors['bg1'])
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=2)
 
-        listFrame = tk.Frame(charFrame, background=self.colors['bg1'])
+        listFrame = tk.Frame(frame, background=self.colors['bg1'])
         tk.Label(listFrame, text='Characters', bg=self.colors['bg1']).pack()
-        listFrame.pack(anchor=tk.NW)
+        listFrame.grid(column=0, row=0, sticky=tk.W)
 
-        charFrame.pack()
-        self.__currentFrame = charFrame
+        charFrame = tk.Frame(frame, background=self.colors['bg1'])
+        ch.Character(charFrame, self.colors)
+        charFrame.grid(column=1, row=0, sticky=tk.W)
+
+        frame.pack(fill=tk.X)
+        self.__currentFrame = frame
 
     def __placePage(self):
         self.__currentFrame.destroy()
