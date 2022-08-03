@@ -7,7 +7,7 @@ import yaml
 
 class CharPage:
     def __init__(self, master, colors, workdir):
-        self.__master = tk.Frame(master)
+        self.__master = tk.Frame(master, background=colors['bg1'])
         self.colors = colors
         self.workdir = workdir
 
@@ -17,7 +17,7 @@ class CharPage:
         self.age = tk.IntVar()
         self.gender = ttk.Combobox()
         self.placeOfBirth = tk.StringVar()
-        self.about = tk.StringVar()
+        self.about = tk.Text()
         # #################### END INIT VARS ####################
         self.createPage()
         self.__master.pack(pady=5)
@@ -34,24 +34,34 @@ class CharPage:
         f_img.grid(column=0, row=0, padx=5, pady=5)
         tk.Label(f_header2, text="Name:", background=self.colors['bg1']).grid(column=0, row=0, sticky=tk.W)
         tk.Entry(f_header2, textvariable=self.name, width=25).grid(column=1, row=0, sticky=tk.W, pady=5, padx=5)
-        tk.Label(f_header2, text="Gender:", background=self.colors['bg1']).grid(column=0, row=1, sticky=tk.W)
+        tk.Label(f_header2, text="Age:", background=self.colors['bg1']).grid(column=0, row=1, sticky=tk.W)
+        tk.Entry(f_header2, textvariable=self.age, width=25).grid(column=1, row=1, sticky=tk.W, pady=5, padx=5)
+        tk.Label(f_header2, text="Gender:", background=self.colors['bg1']).grid(column=0, row=2, sticky=tk.W)
         self.gender = ttk.Combobox(f_header2, values=['M', 'F', 'Non-binary', 'Inter', 'Trans-M', 'Trans-F'], width=22)
-        self.gender.grid(column=1, row=1, sticky=tk.W, pady=5, padx=5)
+        self.gender.grid(column=1, row=2, sticky=tk.W, pady=5, padx=5)
 
-        tk.Button(f_header, text='Save', command=self.save).grid(column=2, row=0)
+        tk.Button(f_header, text='Save', command=self.save).grid(column=2, row=0, padx=5)
 
-        f_header2.grid(column=1, row=0)
-        f_header.pack()
+        f_header2.grid(column=1, row=0, padx=5)
+        f_header.grid(column=0, row=0, sticky=tk.W)
         # #################### END HEADER ####################
 
         # #################### BEGIN IMAGE AND NAME ####################
+        f_about = tk.LabelFrame(self.__master, text='About', background=self.colors['bg1'])
+
+        self.about = tk.Text(f_about, width=50, height=20)
+        self.about.pack(pady=5, padx=5)
+
+        f_about.grid(column=0, row=1, pady=10, sticky=tk.W)
         # #################### END IMAGE AND NAME ####################
 
     def save(self):
         data = {
             'name': self.name.get(),
             'gender': self.gender.get(),
-            'photoFile': self.photoFile.get()
+            'age': self.age.get(),
+            'photoFile': self.photoFile.get(),
+            'about': self.about.get(0.0, tk.END)
         }
 
         print(os.listdir(self.workdir.get()+'/Characters/'))

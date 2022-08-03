@@ -109,6 +109,8 @@ class WorldBuildIn:
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Locations")
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Items")
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Story")
+        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Images")
+        self.workDir.set(self.workDir.get() + '/' + self.worldName.get())
 
     def __charPage(self):
         self.__currentFrame.destroy()
