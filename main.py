@@ -1,10 +1,10 @@
 import tkinter as tk
 import os
 from tkinter import filedialog
-from Frames import Character as ch
+from Frames import CharPage as Chp
 
 
-class WolrdBuildIn:
+class WorldBuildIn:
     def __init__(self):
         # #################### BEGIN INIT VARS ####################
         self.size = {'h': 700, 'w': 1300}
@@ -42,7 +42,7 @@ class WolrdBuildIn:
 
         fileMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         fileMenu.add_command(label='New world', command=self.__new)
-        fileMenu.add_command(label='Open world')
+        fileMenu.add_command(label='Open world', command=self.__browseFiles)
         fileMenu.add_command(label='Save')
         fileMenu.add_command(label='Save as')
         fileMenu.add_separator()
@@ -121,7 +121,7 @@ class WolrdBuildIn:
         listFrame.grid(column=0, row=0, sticky=tk.W)
 
         charFrame = tk.Frame(frame, background=self.colors['bg1'])
-        ch.Character(charFrame, self.colors)
+        Chp.CharPage(charFrame, self.colors, self.workDir)
         charFrame.grid(column=1, row=0, sticky=tk.W)
 
         frame.pack(fill=tk.X)
@@ -173,4 +173,4 @@ class WolrdBuildIn:
 
 
 if __name__ == '__main__':
-    WolrdBuildIn()
+    WorldBuildIn()
