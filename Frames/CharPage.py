@@ -3,6 +3,7 @@ from tkinter import filedialog
 from tkinter import ttk
 import os
 import yaml
+from PIL import Image
 
 
 class CharPage:
@@ -10,10 +11,12 @@ class CharPage:
         self.__master = tk.Frame(master, background=colors['bg1'])
         self.colors = colors
         self.workdir = workdir
+        self.can = tk.Canvas()
 
         # #################### BEGIN INIT VARS ####################
         self.name = tk.StringVar()
         self.photoFile = tk.StringVar()
+        self.photo = Image.Image()
         self.age = tk.IntVar()
         self.gender = ttk.Combobox()
         self.placeOfBirth = tk.StringVar()
@@ -28,9 +31,9 @@ class CharPage:
         f_header2 = tk.LabelFrame(f_header, background=self.colors['bg1'])
 
         f_img = tk.LabelFrame(f_header, background=self.colors['bg1'])
-        img = tk.Canvas(f_img, width=100, height=100)
-        img.bind('<Button-1>', self.__openPicture)
-        img.pack()
+        self.can = tk.Canvas(f_img, width=100, height=100)
+        self.can.bind('<Button-1>', self.__openPicture)
+        self.can.pack()
         f_img.grid(column=0, row=0, padx=5, pady=5)
         tk.Label(f_header2, text="Name:", background=self.colors['bg1']).grid(column=0, row=0, sticky=tk.W)
         tk.Entry(f_header2, textvariable=self.name, width=25).grid(column=1, row=0, sticky=tk.W, pady=5, padx=5)
@@ -56,6 +59,7 @@ class CharPage:
         # #################### END IMAGE AND NAME ####################
 
     def save(self):
+        self.photoFile.set(self.workdir.get()+'/Images/'+self.name.get().replace(' ', '_', 999)+'.png')
         data = {
             'name': self.name.get(),
             'gender': self.gender.get(),
@@ -63,6 +67,7 @@ class CharPage:
             'photoFile': self.photoFile.get(),
             'about': self.about.get(0.0, tk.END)
         }
+        self.photo.save(self.photoFile.get())
 
         print(os.listdir(self.workdir.get()+'/Characters/'))
         files = os.listdir()
@@ -82,6 +87,22 @@ class CharPage:
         if filename_s != "":
             filename = filename_s
         else:
-            filename = self.photoFile.get()
+            return
         # Change label contents
         self.photoFile.set(filename)
+
+        img = Image.open(filename)
+        size = (img.width, img.height)
+        center = (size[0]//2, size[1]//2)
+        if size[0] > size[1]:
+            img = img.crop((center[0]-center[1], 0, center[0]+center[1], size[1]))
+
+        if size[1] > size[0]:
+            img = img.crop((0, center[1]-center[0], size[0], center[1]+center[0]))
+
+        self.photo = img.resize((100, 100))
+        self.photoFile.set(self.workdir.get()+'/Images/'+self.name.get().replace(' ', '_', 999)+'.png')
+        self.photo.save(self.photoFile.get())
+        imgCan = tk.PhotoImage(file=self.photoFile.get())
+        self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
+        self.can.update()
