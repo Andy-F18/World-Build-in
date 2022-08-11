@@ -34,6 +34,7 @@ class WorldBuildIn:
         self.worldName = tk.StringVar()
         self.workDir = tk.StringVar()
         self.workDir.set(os.path.abspath(".")+'\\Projects')
+        self.defaultPath = os.path.abspath(".")+'\\Projects'
 
         self.__root.mainloop()
 
@@ -42,7 +43,7 @@ class WorldBuildIn:
 
         fileMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         fileMenu.add_command(label='New world', command=self.__new)
-        fileMenu.add_command(label='Open world', command=self.__browseFiles)
+        fileMenu.add_command(label='Open world', command=self.__open)
         fileMenu.add_command(label='Save')
         fileMenu.add_command(label='Save as')
         fileMenu.add_separator()
@@ -110,26 +111,50 @@ class WorldBuildIn:
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Items")
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Story")
         os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Images")
+        file = open(self.workDir.get()+"/"+self.worldName.get()+"/."+self.worldName.get().replace(' ', '_', 999), mode='w')
+        file.write('name='+self.worldName.get()+'\nOK=True')
+        file.close()
         self.workDir.set(self.workDir.get() + '/' + self.worldName.get())
 
+    def __open(self):
+        self.__browseFiles()
+        if os.listdir(self.workDir.get()).index('.'+self.worldName.get().replace(' ', '_', 999)) < 0:
+            return
+
+        file = open(self.workDir.get()+"/."+self.worldName.get().replace(' ', '_'), mode='r')
+        fileTxt = file.readlines()
+        file.close()
+        if fileTxt[0] != 'name='+self.worldName.get()+'\n':
+            self.worldName.set('')
+            self.workDir.set(self.defaultPath)
+            return
+        if fileTxt[1] != 'OK=True':
+            self.worldName.set('')
+            self.workDir.set(self.defaultPath)
+            return
+
     def __charPage(self):
+        if self.worldName.get() == '':
+            return
         self.__currentFrame.destroy()
-        frame = tk.Frame(self.__root, background=self.colors['bg1'])
+        frame = tk.Frame(self.__root, background=self.colors['bg2'])
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=2)
 
         listFrame = tk.Frame(frame, background=self.colors['bg1'])
         tk.Label(listFrame, text='Characters', bg=self.colors['bg1']).pack()
-        listFrame.grid(column=0, row=0, sticky=tk.W)
+        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
 
         charFrame = tk.Frame(frame, background=self.colors['bg1'])
         Chp.CharPage(charFrame, self.colors, self.workDir)
-        charFrame.grid(column=1, row=0, sticky=tk.W)
+        charFrame.grid(column=1, row=0, sticky=tk.EW)
 
         frame.pack(fill=tk.X)
         self.__currentFrame = frame
 
     def __placePage(self):
+        if self.worldName.get() == '':
+            return
         self.__currentFrame.destroy()
         placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -141,6 +166,8 @@ class WorldBuildIn:
         self.__currentFrame = placeFrame
 
     def __itemPage(self):
+        if self.worldName.get() == '':
+            return
         self.__currentFrame.destroy()
         itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -152,6 +179,8 @@ class WorldBuildIn:
         self.__currentFrame = itemFrame
 
     def __storyPage(self):
+        if self.worldName.get() == '':
+            return
         self.__currentFrame.destroy()
         storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -172,6 +201,8 @@ class WorldBuildIn:
             filename = self.workDir.get()
         # Change label contents
         self.workDir.set(filename)
+        path = self.workDir.get().split('/')
+        self.worldName.set(path[len(path)-1])
 
 
 if __name__ == '__main__':

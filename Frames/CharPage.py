@@ -79,6 +79,8 @@ class CharPage:
         file.close()
 
     def __openPicture(self, event):
+        if self.name.get() == "":
+            return
         rep = os.path.abspath(os.getcwd())
         filename_s = filedialog.askopenfilename(initialdir=rep,
                                                 title="Select a File",
