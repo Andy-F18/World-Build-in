@@ -33,8 +33,8 @@ class WorldBuildIn:
 
         self.worldName = tk.StringVar()
         self.workDir = tk.StringVar()
-        self.workDir.set(os.path.abspath(".")+'\\Projects')
-        self.defaultPath = os.path.abspath(".")+'\\Projects'
+        self.workDir.set(os.path.abspath(".") + '\\Projects')
+        self.defaultPath = os.path.abspath(".") + '\\Projects'
 
         self.__root.mainloop()
 
@@ -50,13 +50,15 @@ class WorldBuildIn:
         fileMenu.add_command(label='Exit', command=self.__root.quit)
         menu.add_cascade(label='File', menu=fileMenu)
 
-        menu.add_command(label='Add')
+        addMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
+        addMenu.add_command(label='Character', command=self.__addChar)
+        menu.add_cascade(label='Add', menu=addMenu)
 
         self.__root.config(menu=menu)
 
     def __menu_h(self):
         f_menu = tk.Frame(self.__root, background=self.colors['menu1'])
-        w = int(self.size['w']/7.1)//4
+        w = int(self.size['w'] / 7.1) // 4
 
         b_chara = tk.Button(f_menu, text="Character", relief='flat', width=w, command=self.__charPage,
                             background=self.colors['menu1'], activebackground=self.colors['menu2'])
@@ -105,26 +107,27 @@ class WorldBuildIn:
 
         new.grab_set()
         self.__root.wait_window(new)
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get())
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Characters")
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Locations")
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Items")
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Story")
-        os.mkdir(self.workDir.get()+"/"+self.worldName.get()+"/Images")
-        file = open(self.workDir.get()+"/"+self.worldName.get()+"/."+self.worldName.get().replace(' ', '_', 999), mode='w')
-        file.write('name='+self.worldName.get()+'\nOK=True')
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get())
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Characters")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Locations")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Items")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Story")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Images")
+        file = open(self.workDir.get() + "/" + self.worldName.get() + "/." + self.worldName.get().replace(' ', '_', 99),
+                    mode='w')
+        file.write('name=' + self.worldName.get() + '\nOK=True')
         file.close()
         self.workDir.set(self.workDir.get() + '/' + self.worldName.get())
 
     def __open(self):
         self.__browseFiles()
-        if os.listdir(self.workDir.get()).index('.'+self.worldName.get().replace(' ', '_', 999)) < 0:
+        if os.listdir(self.workDir.get()).index('.' + self.worldName.get().replace(' ', '_', 999)) < 0:
             return
 
-        file = open(self.workDir.get()+"/."+self.worldName.get().replace(' ', '_'), mode='r')
+        file = open(self.workDir.get() + "/." + self.worldName.get().replace(' ', '_'), mode='r')
         fileTxt = file.readlines()
         file.close()
-        if fileTxt[0] != 'name='+self.worldName.get()+'\n':
+        if fileTxt[0] != 'name=' + self.worldName.get() + '\n':
             self.worldName.set('')
             self.workDir.set(self.defaultPath)
             return
@@ -132,6 +135,32 @@ class WorldBuildIn:
             self.worldName.set('')
             self.workDir.set(self.defaultPath)
             return
+
+    def __addChar(self):
+        if self.worldName.get() == '':
+            return
+        self.__currentFrame.destroy()
+        frame = tk.Frame(self.__root, background=self.colors['bg2'])
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=2)
+
+        listFrame = tk.LabelFrame(frame, text='Characters', background=self.colors['bg1'])
+        charlist = os.listdir(self.workDir.get() + "/Characters")
+        if len(charlist) == 0:
+            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
+        else:
+            for c in charlist:
+                tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 999)).pack()
+
+        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        charFrame = tk.Frame(frame, background=self.colors['bg1'])
+        charP = Chp.CharPage(charFrame, self.colors, self.workDir)
+        charP.createPage()
+
+        charFrame.grid(column=1, row=0, sticky=tk.EW)
+
+        frame.pack(fill=tk.X)
+        self.__currentFrame = frame
 
     def __charPage(self):
         if self.worldName.get() == '':
@@ -141,16 +170,34 @@ class WorldBuildIn:
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=2)
 
-        listFrame = tk.Frame(frame, background=self.colors['bg1'])
-        tk.Label(listFrame, text='Characters', bg=self.colors['bg1']).pack()
-        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        listFrame = tk.LabelFrame(frame, text='Characters', background=self.colors['bg1'])
+        charlist = os.listdir(self.workDir.get() + "/Characters")
 
         charFrame = tk.Frame(frame, background=self.colors['bg1'])
-        Chp.CharPage(charFrame, self.colors, self.workDir)
+        charP = Chp.CharPage(charFrame, self.colors, self.workDir)
+
+        if len(charlist) == 0:
+            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
+        else:
+            for c in charlist:
+                l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
+                l.pack()
+                l.bind('<Button-1>', lambda event, charFile=c, charP=charP: self.__see(charFile, charP, event))
+
+        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+
+        if len(charlist) != 0:
+            charP.see(self.workDir.get() + "/Characters/" + charlist[0])
+        else:
+            charP.createPage()
+
         charFrame.grid(column=1, row=0, sticky=tk.EW)
 
         frame.pack(fill=tk.X)
         self.__currentFrame = frame
+
+    def __see(self, charFile, charP, event):
+        charP.see(self.workDir.get() + "/Characters/" + charFile)
 
     def __placePage(self):
         if self.worldName.get() == '':
@@ -202,7 +249,7 @@ class WorldBuildIn:
         # Change label contents
         self.workDir.set(filename)
         path = self.workDir.get().split('/')
-        self.worldName.set(path[len(path)-1])
+        self.worldName.set(path[len(path) - 1])
 
 
 if __name__ == '__main__':
