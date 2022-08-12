@@ -140,64 +140,29 @@ class WorldBuildIn:
         if self.worldName.get() == '':
             return
         self.__currentFrame.destroy()
-        frame = tk.Frame(self.__root, background=self.colors['bg2'])
-        frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=2)
+        frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        listFrame = tk.LabelFrame(frame, text='Characters', background=self.colors['bg1'])
-        charlist = os.listdir(self.workDir.get() + "/Characters")
-        if len(charlist) == 0:
-            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
-        else:
-            for c in charlist:
-                tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 999)).pack()
-
-        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
-        charFrame = tk.Frame(frame, background=self.colors['bg1'])
-        charP = Chp.CharPage(charFrame, self.colors, self.workDir)
+        charP = Chp.CharPage(frame, self.colors, self.workDir)
         charP.createPage()
 
-        charFrame.grid(column=1, row=0, sticky=tk.EW)
-
-        frame.pack(fill=tk.X)
         self.__currentFrame = frame
 
     def __charPage(self):
         if self.worldName.get() == '':
             return
         self.__currentFrame.destroy()
-        frame = tk.Frame(self.__root, background=self.colors['bg2'])
-        frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=2)
+        frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        listFrame = tk.LabelFrame(frame, text='Characters', background=self.colors['bg1'])
         charlist = os.listdir(self.workDir.get() + "/Characters")
 
-        charFrame = tk.Frame(frame, background=self.colors['bg1'])
-        charP = Chp.CharPage(charFrame, self.colors, self.workDir)
-
-        if len(charlist) == 0:
-            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
-        else:
-            for c in charlist:
-                l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
-                l.pack()
-                l.bind('<Button-1>', lambda event, charFile=c, charP=charP: self.__see(charFile, charP, event))
-
-        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        charP = Chp.CharPage(frame, self.colors, self.workDir)
 
         if len(charlist) != 0:
             charP.see(self.workDir.get() + "/Characters/" + charlist[0])
         else:
             charP.createPage()
 
-        charFrame.grid(column=1, row=0, sticky=tk.EW)
-
-        frame.pack(fill=tk.X)
         self.__currentFrame = frame
-
-    def __see(self, charFile, charP, event):
-        charP.see(self.workDir.get() + "/Characters/" + charFile)
 
     def __placePage(self):
         if self.worldName.get() == '':

@@ -8,10 +8,11 @@ from PIL import Image
 
 class CharPage:
     def __init__(self, master, colors, workdir):
-        self.master = master
-        self.__root = tk.Frame(master, background=colors['bg1'])
+        self.__root = master
+        self.__root.columnconfigure(0, weight=1)
+        self.__root.columnconfigure(1, weight=2)
         self.colors = colors
-        self.workdir = workdir
+        self.workDir = workdir
         self.genders = ['M', 'F', 'Non-binary', 'Inter', 'Trans-M', 'Trans-F']
         self.can = tk.Canvas()
 
@@ -26,16 +27,31 @@ class CharPage:
         self.about = tk.Text()
         self.aboutT = tk.StringVar()
         # #################### END INIT VARS ####################
-        self.__root.pack(pady=5)
+        self.__root.pack(fill=tk.X)
 
-        # #################### BEGIN INIT VARS ####################
+        # #################### BEGIN CHARACTER LIST ####################
+        listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])
+        charlist = os.listdir(self.workDir.get() + "/Characters")
 
-        # #################### BEGIN HEADER ####################
-        f_header = tk.LabelFrame(self.__root, background=self.colors['bg1'])
+        if len(charlist) == 0:
+            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
+        else:
+            for c in charlist:
+                l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
+                l.pack(pady=1, fill=tk.X, padx=5)
+                l.bind('<Button-1>', lambda event, charFile=c: self.see(self.workDir.get() + "/Characters/"+charFile))
+
+        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        # #################### END CHARACTER LIST ####################
+
+        # #################### BEGIN CHARACTER FORM ####################
+        formFrame = tk.Frame(self.__root, background=self.colors['bg1'])
+        f_header = tk.LabelFrame(formFrame, background=self.colors['bg1'])
         f_header2 = tk.LabelFrame(f_header, background=self.colors['bg1'])
 
         f_img = tk.LabelFrame(f_header, background=self.colors['bg1'])
         self.can = tk.Canvas(f_img, width=100, height=100)
+        self.can.config(background=self.colors['bg1'], highlightbackground=self.colors['bg1'])
         self.can.bind('<Button-1>', self.__openPicture)
         self.can.pack()
         f_img.grid(column=0, row=0, padx=5, pady=5)
@@ -52,26 +68,24 @@ class CharPage:
         self.gender.config(state=tk.NORMAL)
         self.gender.grid(column=1, row=2, sticky=tk.W, pady=5, padx=5)
 
-        self.bSaveEdit = tk.Button(f_header, text='Save', command=self.save, width=5)
-        self.bSaveEdit.grid(column=2, row=0, padx=5)
+        self.bSaveEdit = tk.Button(f_header, text='Save', command=self.save)
+        self.bSaveEdit.grid(column=2, row=0, padx=5, sticky=tk.EW)
 
         f_header2.grid(column=1, row=0, padx=5)
-        f_header.grid(column=0, row=0, sticky=tk.W)
-        # #################### END HEADER ####################
+        f_header.grid(column=0, row=0, sticky=tk.EW)
 
-        # #################### BEGIN IMAGE AND NAME ####################
-        f_about = tk.LabelFrame(self.__root, text='About', background=self.colors['bg1'])
+        f_about = tk.LabelFrame(formFrame, text='About', background=self.colors['bg1'])
 
         self.about = tk.Text(f_about, width=50, height=20)
         self.about.config(state=tk.NORMAL)
         self.about.pack(pady=5, padx=5)
 
-        f_about.grid(column=0, row=1, pady=10, sticky=tk.W)
+        f_about.grid(column=0, row=1, pady=10, sticky=tk.EW)
+
+        formFrame.grid(column=1, row=0, sticky=tk.EW, pady=10)
 
         self.createPage()
-        # #################### END IMAGE AND NAME ####################
-
-        # #################### END INIT VARS ####################
+        # #################### BEGIN CHARACTER FORM ####################
 
     def createPage(self):
         self.eName.config(state=tk.NORMAL)
@@ -82,20 +96,22 @@ class CharPage:
         self.bSaveEdit.config(text='Save', command=self.save)
 
     def see(self, charFile):
-        self.about.focus_get()
+        # self.can.focus_get()
         self.createPage()
         self.can.delete('all')
-        self.can.update()
+        # self.can.update()
         self.load(charFile)
         self.eName.config(state=tk.DISABLED)
         self.eAge.config(state=tk.DISABLED)
         self.gender.config(state=tk.DISABLED)
+        self.about.config(state=tk.DISABLED)
         self.can.unbind('<Button-1>')
         if self.photoFile.get():
             self.can.config(state=tk.NORMAL)
-            img = tk.PhotoImage(file=charFile.replace('Characters', 'Images').replace('.yml', '.png'))
-            self.can.create_image(0, 0, anchor=tk.NW, image=img)
-            self.can.update()
+            self.photo = tk.PhotoImage(file=charFile.replace('Characters', 'Images').replace('.yml', '.png'))
+            self.can.create_image(0, 0, anchor=tk.NW, image=self.photo)
+            # self.can.update()
+
         self.bSaveEdit.config(text='Edit', command=self.createPage)
 
     def load(self, charFile):
@@ -115,14 +131,14 @@ class CharPage:
             'gender': self.gender.get(),
             'age': self.age.get(),
             'photoFile': self.photoFile.get(),
-            'about': self.about.get(0.0, tk.END).replace('\n\n', '')
+            'about': self.about.get(0.0, tk.END).replace('\n', '')
         }
         fileName = self.name.get().replace(' ', '_', 99) + '.yml'
 
-        file = open(self.workdir.get()+'/Characters/'+str(fileName), 'w')
+        file = open(self.workDir.get() + '/Characters/' + str(fileName), 'w')
         file.write(yaml.dump(data, default_flow_style=False))
         file.close()
-        self.see(self.workdir.get()+'/Characters/'+self.name.get().replace(' ', '_', 99)+'.yml')
+        self.see(self.workDir.get() + '/Characters/' + self.name.get().replace(' ', '_', 99) + '.yml')
 
     def __openPicture(self, event):
         if self.name.get() == "":
@@ -149,7 +165,7 @@ class CharPage:
 
         self.photo = img.resize((100, 100))
         self.photoFile.set(True)
-        self.photo.save(self.workdir.get()+'/Images/'+self.name.get().replace(' ', '_', 99)+'.png')
-        imgCan = tk.PhotoImage(file=self.workdir.get()+'/Images/'+self.name.get().replace(' ', '_', 99)+'.png')
+        self.photo.save(self.workDir.get() + '/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
+        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
         self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
         self.can.update()
