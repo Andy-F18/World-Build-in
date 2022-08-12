@@ -2,6 +2,7 @@ import tkinter as tk
 import os
 from tkinter import filedialog
 from Frames import CharPage as Chp
+from Frames import LocationPage as Locp
 
 
 class WorldBuildIn:
@@ -52,6 +53,7 @@ class WorldBuildIn:
 
         addMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         addMenu.add_command(label='Character', command=self.__addChar)
+        addMenu.add_command(label='Location', command=self.__addLoc)
         menu.add_cascade(label='Add', menu=addMenu)
 
         self.__root.config(menu=menu)
@@ -60,20 +62,20 @@ class WorldBuildIn:
         f_menu = tk.Frame(self.__root, background=self.colors['menu1'])
         w = int(self.size['w'] / 7.1) // 4
 
-        b_chara = tk.Button(f_menu, text="Character", relief='flat', width=w, command=self.__charPage,
-                            background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_place = tk.Button(f_menu, text="Locations", relief='flat', width=w, command=self.__placePage,
-                            background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_items = tk.Button(f_menu, text="Items", relief='flat', width=w, command=self.__itemPage,
-                            background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        b_story = tk.Button(f_menu, text="Story", relief='flat', width=w, command=self.__storyPage,
-                            background=self.colors['menu1'], activebackground=self.colors['menu2'])
+        self.b_chara = tk.Button(f_menu, text="Character", relief='flat', width=w, command=self.__charPage,
+                                 background=self.colors['menu1'], activebackground=self.colors['menu2'])
+        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', width=w, command=self.__placePage,
+                                 background=self.colors['menu1'], activebackground=self.colors['menu2'])
+        self.b_items = tk.Button(f_menu, text="Items", relief='flat', width=w, command=self.__itemPage,
+                                 background=self.colors['menu1'], activebackground=self.colors['menu2'])
+        self.b_story = tk.Button(f_menu, text="Story", relief='flat', width=w, command=self.__storyPage,
+                                 background=self.colors['menu1'], activebackground=self.colors['menu2'])
 
         self.__import_file = tk.StringVar()
-        b_chara.grid(column=0, row=0)
-        b_place.grid(column=1, row=0)
-        b_items.grid(column=2, row=0)
-        b_story.grid(column=3, row=0)
+        self.b_chara.grid(column=0, row=0)
+        self.b_place.grid(column=1, row=0)
+        self.b_items.grid(column=2, row=0)
+        self.b_story.grid(column=3, row=0)
 
         f_menu.pack(anchor="w")
 
@@ -139,6 +141,11 @@ class WorldBuildIn:
     def __addChar(self):
         if self.worldName.get() == '':
             return
+        self.b_chara.config(background=self.colors['bg1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['menu1'])
+
         self.__currentFrame.destroy()
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -150,6 +157,11 @@ class WorldBuildIn:
     def __charPage(self):
         if self.worldName.get() == '':
             return
+        self.b_chara.config(background=self.colors['bg1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['menu1'])
+
         self.__currentFrame.destroy()
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -164,22 +176,55 @@ class WorldBuildIn:
 
         self.__currentFrame = frame
 
-    def __placePage(self):
+    def __addLoc(self):
         if self.worldName.get() == '':
             return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['bg1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['menu1'])
+
         self.__currentFrame.destroy()
         placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        listFrame = tk.Frame(placeFrame, background=self.colors['bg1'])
-        tk.Label(listFrame, text='Places', bg=self.colors['bg1']).pack()
-        listFrame.pack(anchor=tk.NW)
+        locList = os.listdir(self.workDir.get() + '/Locations')
 
-        placeFrame.pack()
+        locP = Locp.LocationPage(placeFrame, self.colors, self.workDir)
+
+        locP.createPage()
+
+        self.__currentFrame = placeFrame
+
+    def __placePage(self):
+        if self.worldName.get() == '':
+            return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['bg1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['menu1'])
+
+        self.__currentFrame.destroy()
+        placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
+
+        locList = os.listdir(self.workDir.get() + '/Locations')
+
+        locP = Locp.LocationPage(placeFrame, self.colors, self.workDir)
+
+        if len(locList) != 0:
+            locP.see(locList[0])
+        else:
+            locP.createPage()
+
         self.__currentFrame = placeFrame
 
     def __itemPage(self):
         if self.worldName.get() == '':
             return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['bg1'])
+        self.b_story.config(background=self.colors['menu1'])
+
         self.__currentFrame.destroy()
         itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
@@ -193,6 +238,11 @@ class WorldBuildIn:
     def __storyPage(self):
         if self.worldName.get() == '':
             return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['bg1'])
+
         self.__currentFrame.destroy()
         storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 

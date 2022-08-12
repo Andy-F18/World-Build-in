@@ -131,7 +131,7 @@ class CharPage:
             'gender': self.gender.get(),
             'age': self.age.get(),
             'photoFile': self.photoFile.get(),
-            'about': self.about.get(0.0, tk.END).replace('\n', '')
+            'about': self.about.get(0.0, tk.END).rstrip(self.about.get(0.0, tk.END)[-1])
         }
         fileName = self.name.get().replace(' ', '_', 99) + '.yml'
 
