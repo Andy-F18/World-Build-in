@@ -40,7 +40,7 @@ class CharPage:
             for c in charlist:
                 l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
                 l.pack(pady=1, fill=tk.X, padx=5)
-                l.bind('<Button-1>', lambda event, charFile=c: self.see(charFile))
+                l.bind('<Button-1>', lambda event, charFile=c: self.redirect(charFile))
 
         listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
         # #################### END CHARACTER LIST ####################
@@ -69,7 +69,7 @@ class CharPage:
         self.gender.config(state=tk.NORMAL)
         self.gender.grid(column=1, row=2, sticky=tk.W, pady=5, padx=5)
 
-        self.bSaveEdit = tk.Button(f_header, text='Save', command=self.save)
+        self.bSaveEdit = tk.Button(f_header, text='Save', width=5, command=lambda: self.see(self.save()))
         self.bSaveEdit.grid(column=2, row=0, padx=5, sticky=tk.EW)
 
         f_header2.grid(column=1, row=0, padx=5)
@@ -94,7 +94,7 @@ class CharPage:
         self.gender.config(state=tk.NORMAL)
         self.about.config(state=tk.NORMAL)
         self.can.bind('<Button-1>', self.__openPicture)
-        self.bSaveEdit.config(text='Save', command=self.save)
+        self.bSaveEdit.config(text='Save', command=lambda: self.see(self.save()))
 
     def see(self, charFile):
         # self.can.focus_get()
@@ -108,7 +108,7 @@ class CharPage:
         self.about.config(state=tk.DISABLED)
         self.can.unbind('<Button-1>')
         if self.photoFile.get():
-            self.can.config(state=tk.NORMAL)
+            self.can.bind('<Button-1>', lambda event: self.openFull())
             self.photo = tk.PhotoImage(file=self.workDir.get()+'/Characters/Images/'+charFile.replace('.yml', '.png'))
             self.can.create_image(0, 0, anchor=tk.NW, image=self.photo)
             # self.can.update()
@@ -142,7 +142,15 @@ class CharPage:
         file = open(self.workDir.get() + '/Characters/' + str(fileName), 'w')
         file.write(yaml.dump(data, default_flow_style=False))
         file.close()
-        self.see(fileName)
+        return fileName
+
+    def redirect(self, charFile):
+        self.save()
+        self.see(charFile)
+
+    def openFull(self):
+        img = Image.open(self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99)+'_FULL.png')
+        img.show()
 
     def __openPicture(self, event):
         if self.name.get() == "":
@@ -176,3 +184,6 @@ class CharPage:
                                     + self.name.get().replace(' ', '_', 99) + '.png')
         self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
         self.can.update()
+
+    def destroy(self):
+        self.__root.destroy()

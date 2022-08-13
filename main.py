@@ -3,6 +3,7 @@ import os
 from tkinter import filedialog
 from Frames import CharPage as Chp
 from Frames import LocationPage as Locp
+from Frames import ItemsPage as Itp
 
 
 class WorldBuildIn:
@@ -54,6 +55,7 @@ class WorldBuildIn:
         addMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         addMenu.add_command(label='Character', command=self.__addChar)
         addMenu.add_command(label='Location', command=self.__addLoc)
+        addMenu.add_command(label='Item', command=self.__addItem)
         menu.add_cascade(label='Add', menu=addMenu)
 
         self.__root.config(menu=menu)
@@ -67,7 +69,7 @@ class WorldBuildIn:
 
         self.b_chara = tk.Button(f_menu, text="Character", relief='flat', command=self.__charPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', command=self.__placePage,
+        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', command=self.__locPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
         self.b_items = tk.Button(f_menu, text="Items", relief='flat', command=self.__itemPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
@@ -112,6 +114,9 @@ class WorldBuildIn:
 
         new.grab_set()
         self.__root.wait_window(new)
+        if self.worldName.get() == '':
+            return
+
         os.mkdir(self.workDir.get() + "/" + self.worldName.get())
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Characters")
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Characters/Images")
@@ -202,7 +207,7 @@ class WorldBuildIn:
 
         self.__currentFrame = placeFrame
 
-    def __placePage(self):
+    def __locPage(self):
         if self.worldName.get() == '':
             return
         self.b_chara.config(background=self.colors['menu1'])
@@ -225,6 +230,25 @@ class WorldBuildIn:
 
         self.__currentFrame = placeFrame
 
+    def __addItem(self):
+        if self.worldName.get() == '':
+            return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['bg1'])
+        self.b_story.config(background=self.colors['menu1'])
+
+        self.__currentFrame.destroy()
+        itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
+
+        locList = os.listdir(self.workDir.get() + '/Items')
+
+        itP = Itp.ItemPage(itemFrame, self.colors, self.workDir)
+
+        itP.createPage()
+
+        self.__currentFrame = itemFrame
+
     def __itemPage(self):
         if self.worldName.get() == '':
             return
@@ -236,11 +260,15 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        listFrame = tk.Frame(itemFrame, background=self.colors['bg1'])
-        tk.Label(listFrame, text='Item', bg=self.colors['bg1']).pack()
-        listFrame.pack(anchor=tk.NW)
+        locList = os.listdir(self.workDir.get() + '/Items')
+        locList.remove('Images')
 
-        itemFrame.pack()
+        itP = Itp.ItemPage(itemFrame, self.colors, self.workDir)
+
+        if len(locList) != 0:
+            itP.see(locList[0])
+        else:
+            itP.createPage()
         self.__currentFrame = itemFrame
 
     def __storyPage(self):
