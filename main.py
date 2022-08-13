@@ -60,24 +60,27 @@ class WorldBuildIn:
 
     def __menu_h(self):
         f_menu = tk.Frame(self.__root, background=self.colors['menu1'])
-        w = int(self.size['w'] / 7.1) // 4
+        f_menu.columnconfigure(0, weight=1)
+        f_menu.columnconfigure(1, weight=1)
+        f_menu.columnconfigure(2, weight=1)
+        f_menu.columnconfigure(3, weight=1)
 
-        self.b_chara = tk.Button(f_menu, text="Character", relief='flat', width=w, command=self.__charPage,
+        self.b_chara = tk.Button(f_menu, text="Character", relief='flat', command=self.__charPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', width=w, command=self.__placePage,
+        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', command=self.__placePage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_items = tk.Button(f_menu, text="Items", relief='flat', width=w, command=self.__itemPage,
+        self.b_items = tk.Button(f_menu, text="Items", relief='flat', command=self.__itemPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_story = tk.Button(f_menu, text="Story", relief='flat', width=w, command=self.__storyPage,
+        self.b_story = tk.Button(f_menu, text="Story", relief='flat', command=self.__storyPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
 
         self.__import_file = tk.StringVar()
-        self.b_chara.grid(column=0, row=0)
-        self.b_place.grid(column=1, row=0)
-        self.b_items.grid(column=2, row=0)
-        self.b_story.grid(column=3, row=0)
+        self.b_chara.grid(column=0, row=0, sticky=tk.EW)
+        self.b_place.grid(column=1, row=0, sticky=tk.EW)
+        self.b_items.grid(column=2, row=0, sticky=tk.EW)
+        self.b_story.grid(column=3, row=0, sticky=tk.EW)
 
-        f_menu.pack(anchor="w")
+        f_menu.pack(fill=tk.X)
 
     def __new(self):
         new = tk.Toplevel()
@@ -111,10 +114,13 @@ class WorldBuildIn:
         self.__root.wait_window(new)
         os.mkdir(self.workDir.get() + "/" + self.worldName.get())
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Characters")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Characters/Images")
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Locations")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Locations/Images")
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Items")
+        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Items/Images")
         os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Story")
-        os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Images")
+        # os.mkdir(self.workDir.get() + "/" + self.worldName.get() + "/Images")
         file = open(self.workDir.get() + "/" + self.worldName.get() + "/." + self.worldName.get().replace(' ', '_', 99),
                     mode='w')
         file.write('name=' + self.worldName.get() + '\nOK=True')
@@ -166,11 +172,12 @@ class WorldBuildIn:
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
         charlist = os.listdir(self.workDir.get() + "/Characters")
+        charlist.remove('Images')
 
         charP = Chp.CharPage(frame, self.colors, self.workDir)
 
         if len(charlist) != 0:
-            charP.see(self.workDir.get() + "/Characters/" + charlist[0])
+            charP.see(charlist[0])
         else:
             charP.createPage()
 
@@ -207,6 +214,7 @@ class WorldBuildIn:
         placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
         locList = os.listdir(self.workDir.get() + '/Locations')
+        locList.remove('Images')
 
         locP = Locp.LocationPage(placeFrame, self.colors, self.workDir)
 

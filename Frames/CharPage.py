@@ -32,6 +32,7 @@ class CharPage:
         # #################### BEGIN CHARACTER LIST ####################
         listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])
         charlist = os.listdir(self.workDir.get() + "/Characters")
+        charlist.remove('Images')
 
         if len(charlist) == 0:
             tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
@@ -39,7 +40,7 @@ class CharPage:
             for c in charlist:
                 l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
                 l.pack(pady=1, fill=tk.X, padx=5)
-                l.bind('<Button-1>', lambda event, charFile=c: self.see(self.workDir.get() + "/Characters/"+charFile))
+                l.bind('<Button-1>', lambda event, charFile=c: self.see(charFile))
 
         listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
         # #################### END CHARACTER LIST ####################
@@ -82,7 +83,7 @@ class CharPage:
 
         f_about.grid(column=0, row=1, pady=10, sticky=tk.EW)
 
-        formFrame.grid(column=1, row=0, sticky=tk.EW, pady=10)
+        formFrame.grid(column=1, row=0, pady=10)
 
         self.createPage()
         # #################### BEGIN CHARACTER FORM ####################
@@ -108,14 +109,14 @@ class CharPage:
         self.can.unbind('<Button-1>')
         if self.photoFile.get():
             self.can.config(state=tk.NORMAL)
-            self.photo = tk.PhotoImage(file=charFile.replace('Characters', 'Images').replace('.yml', '.png'))
+            self.photo = tk.PhotoImage(file=self.workDir.get()+'/Characters/Images/'+charFile.replace('.yml', '.png'))
             self.can.create_image(0, 0, anchor=tk.NW, image=self.photo)
             # self.can.update()
 
         self.bSaveEdit.config(text='Edit', command=self.createPage)
 
     def load(self, charFile):
-        file = open(charFile, mode='r')
+        file = open(self.workDir.get()+'/Characters/'+charFile, mode='r')
         char = yaml.load(file, yaml.FullLoader)
         file.close()
 
@@ -126,6 +127,9 @@ class CharPage:
         self.about.replace(0.0, tk.END, char['about'])
 
     def save(self):
+        if self.name.get() == '':
+            return
+
         data = {
             'name': self.name.get(),
             'gender': self.gender.get(),
@@ -138,7 +142,7 @@ class CharPage:
         file = open(self.workDir.get() + '/Characters/' + str(fileName), 'w')
         file.write(yaml.dump(data, default_flow_style=False))
         file.close()
-        self.see(self.workDir.get() + '/Characters/' + self.name.get().replace(' ', '_', 99) + '.yml')
+        self.see(fileName)
 
     def __openPicture(self, event):
         if self.name.get() == "":
@@ -155,17 +159,20 @@ class CharPage:
         # Change label contents
 
         img = Image.open(filename)
+
+        img.save(self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99) + '_FULL.png')
         size = (img.width, img.height)
-        center = (size[0]//2, size[1]//2)
+        center = (size[0] // 2, size[1] // 2)
         if size[0] > size[1]:
-            img = img.crop((center[0]-center[1], 0, center[0]+center[1], size[1]))
+            img = img.crop((center[0] - center[1], 0, center[0] + center[1], size[1]))
 
         if size[1] > size[0]:
-            img = img.crop((0, center[1]-center[0], size[0], center[1]+center[0]))
+            img = img.crop((0, center[1] - center[0], size[0], center[1] + center[0]))
 
         self.photo = img.resize((100, 100))
         self.photoFile.set(True)
-        self.photo.save(self.workDir.get() + '/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
-        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
+        self.photo.save(self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
+        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Characters/Images/'
+                                    + self.name.get().replace(' ', '_', 99) + '.png')
         self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
         self.can.update()
