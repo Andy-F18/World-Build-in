@@ -15,7 +15,10 @@ class StoryPage:
         for s in os.listdir(self.workDir.get()+'/Story'):
             self.story.append(s.replace('.yml', '').replace('_', ' ', 99))
 
-        # self.story.remove('Images')
+        try:
+            self.story.remove('Images')
+        except ValueError:
+            pass
 
         self.locations = []
         for l in os.listdir(self.workDir.get() + '/Locations'):
@@ -65,22 +68,31 @@ class StoryPage:
         self.bSaveEdit = tk.Button(fHeader, text='Save', width=5, command=lambda: self.see(self.save()))
         self.bSaveEdit.grid(column=4, row=0, padx=5, pady=5)
 
-        fHeader.grid(column=0, row=0, padx=5, pady=5)
+        fHeader.grid(column=0, row=0, padx=5, pady=10)
 
         fAbout = tk.LabelFrame(self.fForm, text='Content', background=self.colors['bg1'])
         fAbout.columnconfigure(0, weight=1)
         self.about = tk.Text(fAbout)
         self.about.grid(column=0, row=0, sticky=tk.NSEW, pady=5, padx=5)
-        fAbout.grid(column=0, row=1, sticky=tk.NSEW)
+        fAbout.grid(column=0, row=1, pady=10, padx=10, sticky=tk.NSEW)
+
+        fNext = tk.LabelFrame(self.fForm, background=self.colors['bg1'])
+        tk.Label(fNext, text='Next:', background=self.colors['bg1']).grid(column=0, row=0, sticky=tk.W)
+        self.next = ttk.Combobox(fNext, values=self.story, width=22)
+        self.next.grid(column=1, row=0, padx=5, pady=5, sticky=tk.W)
+        fNext.grid(column=0, row=2, pady=10)
 
         self.fForm.grid(column=1, row=0, pady=5, padx=5, sticky=tk.NSEW)
         # #################### END STORY FORM ####################
+        self.createPage()
 
     def createPage(self):
         self.eName.config(state=tk.NORMAL)
         self.location.config(state=tk.NORMAL)
         self.location.unbind('<Button-1>')
         self.about.config(state=tk.NORMAL)
+        self.next.config(values=self.story, state=tk.NORMAL)
+        self.next.unbind('<Button-1>')
         self.bSaveEdit.config(text='Save', command=lambda: self.see(self.save()))
 
     def see(self, storyFile):
@@ -92,6 +104,9 @@ class StoryPage:
         # if self.location.get() != '':
         #     self.location.bind('<Button-1>')
         self.about.config(state=tk.DISABLED)
+        self.next.config(state=tk.DISABLED)
+        if self.next.get() != '':
+            self.next.bind('<Button-1>', lambda event: self.redirect(self.next.get().replace(' ', '_', 99)+'.yml'))
         self.bSaveEdit.config(text='Edit', command=self.createPage)
 
     def load(self, storyFile):
@@ -104,6 +119,12 @@ class StoryPage:
             self.location.current(self.locations.index(story['location']))
         else:
             self.location.set('')
+
+        if story['next'] != '':
+            self.next.current(self.story.index(story['next']))
+        else:
+            self.next.set('')
+
         self.about.replace(0.0, tk.END, story['about'])
 
     def save(self):
@@ -113,7 +134,8 @@ class StoryPage:
         data = {
             'name': self.name.get(),
             'location': self.location.get(),
-            'about': self.about.get(0.0, tk.END).rstrip(self.about.get(0.0, tk.END)[-1])
+            'about': self.about.get(0.0, tk.END).rstrip(self.about.get(0.0, tk.END)[-1]),
+            'next': self.next.get()
         }
         fileName = self.name.get().replace(' ', '_', 99) + '.yml'
         file = open(self.workDir.get() + '/Story/' + fileName, mode='w')
