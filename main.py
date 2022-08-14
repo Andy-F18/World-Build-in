@@ -1,6 +1,11 @@
 import tkinter as tk
 import os
 from tkinter import filedialog
+
+import yaml
+from docx import Document
+from docx.shared import Cm
+
 from Frames import CharPage as Chp
 from Frames import LocationPage as Locp
 from Frames import ItemsPage as Itp
@@ -48,8 +53,9 @@ class WorldBuildIn:
         fileMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         fileMenu.add_command(label='New world', command=self.__new)
         fileMenu.add_command(label='Open world', command=self.__open)
-        fileMenu.add_command(label='Save')
-        fileMenu.add_command(label='Save as')
+        # fileMenu.add_command(label='Save')
+        # fileMenu.add_command(label='Save as')
+        fileMenu.add_command(label='Export to Docx', command=self.exportDocx)
         fileMenu.add_separator()
         fileMenu.add_command(label='Exit', command=self.__root.quit)
         menu.add_cascade(label='File', menu=fileMenu)
@@ -323,6 +329,130 @@ class WorldBuildIn:
         self.workDir.set(filename)
         path = self.workDir.get().split('/')
         self.worldName.set(path[len(path) - 1])
+
+    def exportDocx(self):
+        if self.worldName.get() == '':
+            return
+
+        doc = Document()
+        doc.add_heading(self.worldName.get(), 0)
+        doc.add_page_break()
+
+        # #################### BEGIN CHARACTERS ####################
+        doc.add_heading('Characters', 1)
+        charList = os.listdir(self.workDir.get()+'/Characters')
+        charList.remove('Images')
+
+        for char in charList:
+            file = open(self.workDir.get() + '/Characters/' + char, mode='r')
+            c = yaml.load(file, yaml.FullLoader)
+            file.close()
+
+            doc.add_heading(c['name'], 2)
+            table = doc.add_table(rows=1, cols=2)
+            table.autofit = False
+            table.allow_autofit = False
+            table.cell(0, 0).width = Cm(4)
+            if c['photoFile']:
+                picCell = table.rows[0].cells[0].paragraphs[0]
+                run = picCell.add_run()
+                run.add_picture(self.workDir.get()+'/Characters/Images/'+char.replace('.yml', '_FULL.png'),
+                                width=Cm(3), height=Cm(3))
+
+            p = table.rows[0].cells[1].add_paragraph()
+            p.add_run('Age:').underline = True
+            p.add_run(f"\t\t{c['age']}\n")
+            p.add_run('Gender:').underline = True
+            p.add_run(f"\t{c['gender']}")
+
+            doc.add_heading('About', 3)
+            doc.add_paragraph(c['about'])
+
+            doc.add_page_break()
+        # #################### END CHARACTERS ####################
+
+        # #################### BEGIN LOCATIONS ####################
+        doc.add_heading('Locations', 1)
+        locList = os.listdir(self.workDir.get()+"/Locations")
+        locList.remove('Images')
+
+        for loc in locList:
+            file = open(self.workDir.get()+'/locations/'+loc, mode='r')
+            l = yaml.load(file, yaml.FullLoader)
+            file.close()
+
+            doc.add_heading(l['name'], 2)
+            if l['photoFile']:
+                doc.add_picture(self.workDir.get() + '/Locations/Images/' + loc.replace('.yml', '_FULL.png'),
+                                width=Cm(15))
+
+            if l['location'] != '':
+                p = doc.add_paragraph()
+                p.add_run('Location:').underline = True
+                p.add_run(f"\t{l['location']}")
+
+            doc.add_heading('Places', 3)
+            if len(l['places']) != 0:
+                p = doc.add_paragraph(style='List Bullet')
+                for place in l['places']:
+                    p.add_run(place)
+            else:
+                doc.add_paragraph('No places here.')
+
+            doc.add_heading('About', 3)
+            doc.add_paragraph(l['about'])
+
+            doc.add_page_break()
+        # #################### END LOCATIONS ####################
+
+        # #################### BEGIN ITEMS ####################
+        doc.add_heading('Items', 1)
+        itemList = os.listdir(self.workDir.get()+'/Items')
+        itemList.remove('Images')
+
+        for item in itemList:
+            file = open(self.workDir.get() + '/Items/' + item, mode='r')
+            i = yaml.load(file, yaml.FullLoader)
+            file.close()
+
+            doc.add_heading(i['name'], 2)
+            if i['photoFile']:
+                doc.add_picture(self.workDir.get()+'/Items/Images/'+item.replace('.yml', '_FULL.png'),
+                                height=Cm(3))
+
+            if i['location'] != '':
+                p = doc.add_paragraph()
+                p.add_run('Location:').underline = True
+                p.add_run(f"\t{i['location']}")
+
+            doc.add_heading('About', 3)
+            doc.add_paragraph(i['about'])
+
+            doc.add_page_break()
+        # #################### END ITEMS ####################
+
+        # #################### BEGIN Story ####################
+        doc.add_heading('Story', 1)
+        chapList = os.listdir(self.workDir.get()+'/Story')
+
+        for chap in chapList:
+            file = open(self.workDir.get() + '/Story/' + chap, mode='r')
+            c = yaml.load(file, yaml.FullLoader)
+            file.close()
+
+            doc.add_heading(c['name'], 2)
+            if c['location'] != '':
+                p = doc.add_paragraph()
+                p.add_run('location:').underline = True
+                p.add_run(f"\t{c['location']}")
+
+            doc.add_heading('Content', 3)
+            doc.add_paragraph(c['about'])
+
+            doc.add_page_break()
+        # #################### END Story ####################
+
+        doc.save(self.workDir.get()+"/"+self.worldName.get().replace(' ', '_', 99)+'.docx')
 
 
 if __name__ == '__main__':
