@@ -4,6 +4,7 @@ from tkinter import filedialog
 from Frames import CharPage as Chp
 from Frames import LocationPage as Locp
 from Frames import ItemsPage as Itp
+from Frames import StoryPage as Stp
 
 
 class WorldBuildIn:
@@ -21,6 +22,7 @@ class WorldBuildIn:
         # #################### BEGIN WINDOW ####################
         self.__root = tk.Tk()
         self.__root.title("World Build'in")
+        self.__root.columnconfigure(0, weight=1)
 
         self.__root.configure(background=self.colors['bg1'])
         p_r = int(self.__root.winfo_screenwidth() / 2 - self.size['w'] / 2)
@@ -31,7 +33,7 @@ class WorldBuildIn:
         self.__menu_p()
         self.__menu_h()
         self.__currentFrame = tk.Frame(self.__root)
-        self.__currentFrame.pack()
+        # self.__currentFrame.pack()
 
         self.worldName = tk.StringVar()
         self.workDir = tk.StringVar()
@@ -56,6 +58,7 @@ class WorldBuildIn:
         addMenu.add_command(label='Character', command=self.__addChar)
         addMenu.add_command(label='Location', command=self.__addLoc)
         addMenu.add_command(label='Item', command=self.__addItem)
+        addMenu.add_command(label='Chapters', command=self.__addStory)
         menu.add_cascade(label='Add', menu=addMenu)
 
         self.__root.config(menu=menu)
@@ -82,7 +85,7 @@ class WorldBuildIn:
         self.b_items.grid(column=2, row=0, sticky=tk.EW)
         self.b_story.grid(column=3, row=0, sticky=tk.EW)
 
-        f_menu.pack(fill=tk.X)
+        f_menu.grid(column=0, row=0, sticky=tk.EW)
 
     def __new(self):
         new = tk.Toplevel()
@@ -271,6 +274,22 @@ class WorldBuildIn:
             itP.createPage()
         self.__currentFrame = itemFrame
 
+    def __addStory(self):
+        if self.worldName.get() == '':
+            return
+        self.b_chara.config(background=self.colors['menu1'])
+        self.b_place.config(background=self.colors['menu1'])
+        self.b_items.config(background=self.colors['menu1'])
+        self.b_story.config(background=self.colors['bg1'])
+
+        self.__currentFrame.destroy()
+        storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
+
+        storyP = Stp.StoryPage(storyFrame, self.colors, self.workDir)
+        storyP.createPage()
+
+        self.__currentFrame = storyFrame
+
     def __storyPage(self):
         if self.worldName.get() == '':
             return
@@ -282,11 +301,14 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        listFrame = tk.Frame(storyFrame, background=self.colors['bg1'])
-        tk.Label(listFrame, text='Story', bg=self.colors['bg1']).pack()
-        listFrame.pack(anchor=tk.NW)
+        listStory = os.listdir(self.workDir.get()+'/Story')
+        # listStory.remove('Images')
+        storyP = Stp.StoryPage(storyFrame, self.colors, self.workDir)
+        if len(listStory) != 0:
+            storyP.see(listStory[0])
+        else:
+            storyP.createPage()
 
-        storyFrame.pack()
         self.__currentFrame = storyFrame
 
     def __browseFiles(self):

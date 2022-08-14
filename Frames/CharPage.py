@@ -27,7 +27,7 @@ class CharPage:
         self.about = tk.Text()
         self.aboutT = tk.StringVar()
         # #################### END INIT VARS ####################
-        self.__root.pack(fill=tk.X)
+        self.__root.grid(column=0, row=1, sticky=tk.NSEW)
 
         # #################### BEGIN CHARACTER LIST ####################
         listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])

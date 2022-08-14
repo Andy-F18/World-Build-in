@@ -28,7 +28,7 @@ class LocationPage:
         self.about = tk.Text()
         self.photo = tk.PhotoImage
         # #################### END INIT VARS ####################
-        self.__root.pack(fill=tk.X)
+        self.__root.grid(column=0, row=1, sticky=tk.NSEW)
 
         # #################### BEGIN LOCATIONS LIST ####################
         listFrame = tk.LabelFrame(self.__root, text='Locations', background=self.colors['bg1'])

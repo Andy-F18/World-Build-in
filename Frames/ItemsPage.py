@@ -33,7 +33,7 @@ class ItemPage:
         self.about = tk.Text()
         self.photo = tk.PhotoImage
         # #################### END INIT VARS ####################
-        self.__root.pack(fill=tk.X)
+        self.__root.grid(column=0, row=1, sticky=tk.NSEW)
 
         # #################### BEGIN ITEMS LIST ####################
         listFrame = tk.LabelFrame(self.__root, text='Items', background=self.colors['bg1'])
@@ -112,8 +112,8 @@ class ItemPage:
             self.photo = tk.PhotoImage(file=self.workDir.get() + '/Items/Images/' + itemFile.replace('.yml', '.png'))
             self.can.create_image(0, 0, anchor=tk.NW, image=self.photo)
 
-    def load(self, locFile):
-        file = open(self.workDir.get() + '/Items/' + locFile, mode='r')
+    def load(self, itemFile):
+        file = open(self.workDir.get() + '/Items/' + itemFile, mode='r')
         item = yaml.load(file, yaml.FullLoader)
         file.close()
 
