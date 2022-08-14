@@ -354,12 +354,12 @@ class WorldBuildIn:
             table.allow_autofit = False
             table.cell(0, 0).width = Cm(4)
             if c['photoFile']:
-                picCell = table.rows[0].cells[0].paragraphs[0]
+                picCell = table.cell(0, 0).paragraphs[0]
                 run = picCell.add_run()
                 run.add_picture(self.workDir.get()+'/Characters/Images/'+char.replace('.yml', '_FULL.png'),
                                 width=Cm(3), height=Cm(3))
 
-            p = table.rows[0].cells[1].add_paragraph()
+            p = table.cell(0, 1).add_paragraph()
             p.add_run('Age:').underline = True
             p.add_run(f"\t\t{c['age']}\n")
             p.add_run('Gender:').underline = True
@@ -416,12 +416,18 @@ class WorldBuildIn:
             file.close()
 
             doc.add_heading(i['name'], 2)
+            table = doc.add_table(rows=1, cols=2)
+            table.autofit = False
+            table.allow_autofit = False
+            table.cell(0, 0).width = Cm(4)
             if i['photoFile']:
-                doc.add_picture(self.workDir.get()+'/Items/Images/'+item.replace('.yml', '_FULL.png'),
+                picCell = table.cell(0, 0).paragraphs[0]
+                run = picCell.add_run()
+                run.add_picture(self.workDir.get()+'/Items/Images/'+item.replace('.yml', '_FULL.png'),
                                 height=Cm(3))
 
             if i['location'] != '':
-                p = doc.add_paragraph()
+                p = table.cell(0, 1).add_paragraph()
                 p.add_run('Location:').underline = True
                 p.add_run(f"\t{i['location']}")
 
