@@ -1,6 +1,6 @@
 __pycache__/
 .idea/
 Projects/*
-dist/
+dist/Projects/
 build/
 main.spec
