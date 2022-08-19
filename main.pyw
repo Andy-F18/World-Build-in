@@ -390,9 +390,8 @@ class WorldBuildIn:
 
             doc.add_heading('Places', 3)
             if len(l['places']) != 0:
-                p = doc.add_paragraph(style='List Bullet')
                 for place in l['places']:
-                    p.add_run(place)
+                    doc.add_paragraph(place, style='List Bullet')
             else:
                 doc.add_paragraph('No places here.')
 
