@@ -7,7 +7,8 @@ from PIL import Image
 
 
 class CharPage:
-    def __init__(self, master, colors, workdir):
+    def __init__(self, main, master, colors, workdir):
+        self.main = main
         self.__root = master
         self.__root.columnconfigure(0, weight=1)
         self.__root.columnconfigure(1, weight=2)

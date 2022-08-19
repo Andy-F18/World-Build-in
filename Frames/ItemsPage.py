@@ -7,7 +7,8 @@ from PIL import Image
 
 
 class ItemPage:
-    def __init__(self, master, colors, workdir):
+    def __init__(self, main, master, colors, workdir):
+        self.main = main
         self.__root = master
         self.__root.columnconfigure(0, weight=1)
         self.__root.columnconfigure(1, weight=2)
@@ -100,9 +101,9 @@ class ItemPage:
 
         self.eName.config(state=tk.DISABLED)
         self.location.config(state=tk.DISABLED)
-        # if self.location.get() != '':
-        #     self.location.bind('<Button-1>',
-        #                        lambda event, loc=self.location.get(): self.see(loc.replace(' ', '_', 99) + '.yml'))
+        if self.location.get() != '':
+            self.location.bind('<Button-1>',
+                               lambda event, loc=self.location.get(): self.main.locPage(loc.replace(' ', '_', 99) + '.yml'))
         self.about.config(state=tk.DISABLED)
         self.can.unbind('<Button-1>')
         self.bSaveEdit.config(text='Edit', command=self.createPage)

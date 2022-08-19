@@ -5,7 +5,8 @@ import yaml
 
 
 class StoryPage:
-    def __init__(self, master, colors, workdir):
+    def __init__(self, main, master, colors, workdir):
+        self.main = main
         self.__root = master
         self.__root.columnconfigure(0, weight=1)
         self.__root.columnconfigure(1, weight=2)
@@ -73,7 +74,11 @@ class StoryPage:
         fAbout = tk.LabelFrame(self.fForm, text='Content', background=self.colors['bg1'])
         fAbout.columnconfigure(0, weight=1)
         self.about = tk.Text(fAbout)
+        scroll = tk.Scrollbar(fAbout)
+        scroll.configure(command=self.about.yview)
         self.about.grid(column=0, row=0, sticky=tk.NSEW, pady=5, padx=5)
+        scroll.grid(column=1, row=0, sticky=tk.NS, pady=5)
+        self.about.configure(state=tk.DISABLED, yscrollcommand=scroll.set)
         fAbout.grid(column=0, row=1, pady=10, padx=10, sticky=tk.NSEW)
 
         fNext = tk.LabelFrame(self.fForm, background=self.colors['bg1'])
@@ -101,8 +106,9 @@ class StoryPage:
 
         self.eName.config(state=tk.DISABLED)
         self.location.config(state=tk.DISABLED)
-        # if self.location.get() != '':
-        #     self.location.bind('<Button-1>')
+        if self.location.get() != '':
+            self.location.bind('<Button-1>',
+                               lambda event, loc=self.location.get(): self.main.locPage(loc.replace(' ', '_', 99) + '.yml'))
         self.about.config(state=tk.DISABLED)
         self.next.config(state=tk.DISABLED)
         if self.next.get() != '':
@@ -146,3 +152,6 @@ class StoryPage:
     def redirect(self, storyFile):
         self.save()
         self.see(storyFile)
+
+    def destroy(self):
+        self.__root.destroy()

@@ -76,13 +76,13 @@ class WorldBuildIn:
         f_menu.columnconfigure(2, weight=1)
         f_menu.columnconfigure(3, weight=1)
 
-        self.b_chara = tk.Button(f_menu, text="Character", relief='flat', command=self.__charPage,
+        self.b_chara = tk.Button(f_menu, text="Character", relief='flat', command=self.charPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', command=self.__locPage,
+        self.b_place = tk.Button(f_menu, text="Locations", relief='flat', command=self.locPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_items = tk.Button(f_menu, text="Items", relief='flat', command=self.__itemPage,
+        self.b_items = tk.Button(f_menu, text="Items", relief='flat', command=self.itemPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
-        self.b_story = tk.Button(f_menu, text="Story", relief='flat', command=self.__storyPage,
+        self.b_story = tk.Button(f_menu, text="Story", relief='flat', command=self.storyPage,
                                  background=self.colors['menu1'], activebackground=self.colors['menu2'])
 
         self.__import_file = tk.StringVar()
@@ -140,6 +140,7 @@ class WorldBuildIn:
         file.write('name=' + self.worldName.get() + '\nOK=True')
         file.close()
         self.workDir.set(self.workDir.get() + '/' + self.worldName.get())
+        self.charPage()
 
     def __open(self):
         self.__browseFiles()
@@ -158,6 +159,8 @@ class WorldBuildIn:
             self.workDir.set(self.defaultPath)
             return
 
+        self.charPage()
+
     def __addChar(self):
         if self.worldName.get() == '':
             return
@@ -169,12 +172,12 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        charP = Chp.CharPage(frame, self.colors, self.workDir)
+        charP = Chp.CharPage(self, frame, self.colors, self.workDir)
         charP.createPage()
 
-        self.__currentFrame = frame
+        self.__currentFrame = charP
 
-    def __charPage(self):
+    def charPage(self, char=None):
         if self.worldName.get() == '':
             return
         self.b_chara.config(background=self.colors['bg1'])
@@ -185,17 +188,20 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        charlist = os.listdir(self.workDir.get() + "/Characters")
-        charlist.remove('Images')
+        charList = os.listdir(self.workDir.get() + "/Characters")
+        charList.remove('Images')
 
-        charP = Chp.CharPage(frame, self.colors, self.workDir)
+        charP = Chp.CharPage(self, frame, self.colors, self.workDir)
 
-        if len(charlist) != 0:
-            charP.see(charlist[0])
+        if len(charList) != 0:
+            if char is None:
+                charP.see(charList[0])
+            else:
+                charP.see(char)
         else:
             charP.createPage()
 
-        self.__currentFrame = frame
+        self.__currentFrame = charP
 
     def __addLoc(self):
         if self.worldName.get() == '':
@@ -208,15 +214,13 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        locList = os.listdir(self.workDir.get() + '/Locations')
-
-        locP = Locp.LocationPage(placeFrame, self.colors, self.workDir)
+        locP = Locp.LocationPage(self, placeFrame, self.colors, self.workDir)
 
         locP.createPage()
 
-        self.__currentFrame = placeFrame
+        self.__currentFrame = locP
 
-    def __locPage(self):
+    def locPage(self, loc=None):
         if self.worldName.get() == '':
             return
         self.b_chara.config(background=self.colors['menu1'])
@@ -230,14 +234,17 @@ class WorldBuildIn:
         locList = os.listdir(self.workDir.get() + '/Locations')
         locList.remove('Images')
 
-        locP = Locp.LocationPage(placeFrame, self.colors, self.workDir)
+        locP = Locp.LocationPage(self, placeFrame, self.colors, self.workDir)
 
         if len(locList) != 0:
-            locP.see(locList[0])
+            if loc is None:
+                locP.see(locList[0])
+            else:
+                locP.see(loc)
         else:
             locP.createPage()
 
-        self.__currentFrame = placeFrame
+        self.__currentFrame = locP
 
     def __addItem(self):
         if self.worldName.get() == '':
@@ -250,15 +257,13 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        locList = os.listdir(self.workDir.get() + '/Items')
-
-        itP = Itp.ItemPage(itemFrame, self.colors, self.workDir)
+        itP = Itp.ItemPage(self, itemFrame, self.colors, self.workDir)
 
         itP.createPage()
 
-        self.__currentFrame = itemFrame
+        self.__currentFrame = itP
 
-    def __itemPage(self):
+    def itemPage(self, item=None):
         if self.worldName.get() == '':
             return
         self.b_chara.config(background=self.colors['menu1'])
@@ -272,13 +277,16 @@ class WorldBuildIn:
         locList = os.listdir(self.workDir.get() + '/Items')
         locList.remove('Images')
 
-        itP = Itp.ItemPage(itemFrame, self.colors, self.workDir)
+        itP = Itp.ItemPage(self, itemFrame, self.colors, self.workDir)
 
         if len(locList) != 0:
-            itP.see(locList[0])
+            if item is None:
+                itP.see(locList[0])
+            else:
+                itP.see(item)
         else:
             itP.createPage()
-        self.__currentFrame = itemFrame
+        self.__currentFrame = itP
 
     def __addStory(self):
         if self.worldName.get() == '':
@@ -291,12 +299,12 @@ class WorldBuildIn:
         self.__currentFrame.destroy()
         storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
 
-        storyP = Stp.StoryPage(storyFrame, self.colors, self.workDir)
+        storyP = Stp.StoryPage(self, storyFrame, self.colors, self.workDir)
         storyP.createPage()
 
-        self.__currentFrame = storyFrame
+        self.__currentFrame = storyP
 
-    def __storyPage(self):
+    def storyPage(self, story=None):
         if self.worldName.get() == '':
             return
         self.b_chara.config(background=self.colors['menu1'])
@@ -309,13 +317,16 @@ class WorldBuildIn:
 
         listStory = os.listdir(self.workDir.get()+'/Story')
         # listStory.remove('Images')
-        storyP = Stp.StoryPage(storyFrame, self.colors, self.workDir)
+        storyP = Stp.StoryPage(self, storyFrame, self.colors, self.workDir)
         if len(listStory) != 0:
-            storyP.see(listStory[0])
+            if story is None:
+                storyP.see(listStory[0])
+            else:
+                storyP.see(story)
         else:
             storyP.createPage()
 
-        self.__currentFrame = storyFrame
+        self.__currentFrame = storyP
 
     def __browseFiles(self):
         rep = os.path.abspath(os.getcwd())
