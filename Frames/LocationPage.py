@@ -160,8 +160,9 @@ class LocationPage:
     def save(self):
         if self.name.get() == '':
             return
+        if self.prevName.get() != '':
+            self.renameFile()
 
-        self.renameFile()
         data = {
             'name': self.name.get(),
             'location': self.location.get(),

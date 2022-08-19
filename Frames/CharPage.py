@@ -137,7 +137,9 @@ class CharPage:
     def save(self):
         if self.name.get() == '':
             return
-        self.renameFile()
+        if self.prevName.get() != '':
+            self.renameFile()
+
         data = {
             'name': self.name.get(),
             'gender': self.gender.get(),
