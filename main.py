@@ -7,10 +7,10 @@ import yaml
 from docx import Document
 from docx.shared import Cm
 
-from Frames import CharPage as Chp
-from Frames import LocationPage as Locp
-from Frames import ItemsPage as Itp
-from Frames import StoryPage as Stp
+from Frames import CharPage as ChPage
+from Frames import LocationPage as LocPage
+from Frames import ItemsPage as ItPage
+from Frames import StoryPage as StPage
 
 
 class WorldBuildIn:
@@ -27,7 +27,7 @@ class WorldBuildIn:
 
         # #################### BEGIN WINDOW ####################
         self.__root = tk.Tk()
-        self.__root.title("World Build'in")
+        self.__root.title("World Build")
         self.__root.columnconfigure(0, weight=1)
 
         self.__root.configure(background=self.colors['bg1'])
@@ -171,15 +171,7 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        try:
-            self.__currentFrame.save()
-            self.__currentFrame.destroy()
-        except AttributeError:
-            pass
-
-        frame = tk.Frame(self.__root, background=self.colors['bg1'])
-
-        charP = Chp.CharPage(self, frame, self.colors, self.workDir)
+        charP = ChPage.CharPage(self, self.chFrame(), self.colors, self.workDir)
         charP.createPage()
 
         self.__currentFrame = charP
@@ -193,17 +185,10 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        try:
-            self.__currentFrame.save()
-            self.__currentFrame.destroy()
-        except AttributeError:
-            pass
-        frame = tk.Frame(self.__root, background=self.colors['bg1'])
-
         charList = os.listdir(self.workDir.get() + "/Characters")
         charList.remove('Images')
 
-        charP = Chp.CharPage(self, frame, self.colors, self.workDir)
+        charP = ChPage.CharPage(self, self.chFrame(), self.colors, self.workDir)
 
         if len(charList) != 0:
             if char is None:
@@ -224,10 +209,7 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
-        placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
-        locP = Locp.LocationPage(self, placeFrame, self.colors, self.workDir)
+        locP = LocPage.LocationPage(self, self.chFrame(), self.colors, self.workDir)
 
         locP.createPage()
 
@@ -242,13 +224,10 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
-        placeFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
         locList = os.listdir(self.workDir.get() + '/Locations')
         locList.remove('Images')
 
-        locP = Locp.LocationPage(self, placeFrame, self.colors, self.workDir)
+        locP = LocPage.LocationPage(self, self.chFrame(), self.colors, self.workDir)
 
         if len(locList) != 0:
             if loc is None:
@@ -269,10 +248,7 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['bg1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
-        itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
-        itP = Itp.ItemPage(self, itemFrame, self.colors, self.workDir)
+        itP = ItPage.ItemPage(self, self.chFrame(), self.colors, self.workDir)
 
         itP.createPage()
 
@@ -287,13 +263,10 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['bg1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
-        itemFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
         locList = os.listdir(self.workDir.get() + '/Items')
         locList.remove('Images')
 
-        itP = Itp.ItemPage(self, itemFrame, self.colors, self.workDir)
+        itP = ItPage.ItemPage(self, self.chFrame(), self.colors, self.workDir)
 
         if len(locList) != 0:
             if item is None:
@@ -313,10 +286,7 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['bg1'])
 
-        self.__currentFrame.destroy()
-        storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
-        storyP = Stp.StoryPage(self, storyFrame, self.colors, self.workDir)
+        storyP = StPage.StoryPage(self, self.chFrame(), self.colors, self.workDir)
         storyP.createPage()
 
         self.__currentFrame = storyP
@@ -330,12 +300,9 @@ class WorldBuildIn:
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['bg1'])
 
-        self.__currentFrame.destroy()
-        storyFrame = tk.Frame(self.__root, background=self.colors['bg1'])
-
         listStory = os.listdir(self.workDir.get()+'/Story')
         # listStory.remove('Images')
-        storyP = Stp.StoryPage(self, storyFrame, self.colors, self.workDir)
+        storyP = StPage.StoryPage(self, self.chFrame(), self.colors, self.workDir)
         if len(listStory) != 0:
             if story is None:
                 storyP.see(listStory[0])
@@ -491,10 +458,25 @@ class WorldBuildIn:
         doc.save(self.workDir.get()+"/"+self.worldName.get().replace(' ', '_', 99)+'.docx')
         self.message('Exportation', 'Exportation successful!')
 
-    def warning(self, title, msg):
+    def chFrame(self):
+        try:
+            self.__currentFrame.save()
+        except AttributeError:
+            pass
+
+        try:
+            self.__currentFrame.destroy()
+        except AttributeError:
+            pass
+
+        return tk.Frame(self.__root, background=self.colors['bg1'])
+
+    @staticmethod
+    def warning(title, msg):
         messagebox.showwarning(title, msg)
 
-    def message(self, title, msg):
+    @staticmethod
+    def message(title, msg):
         messagebox.showinfo(title, msg)
 
 

@@ -19,6 +19,7 @@ class CharPage:
 
         # #################### BEGIN INIT VARS ####################
         self.name = tk.StringVar()
+        self.prevName = tk.StringVar()
         self.photoFile = tk.BooleanVar()
         self.photoFile.set(False)
         self.photo = Image.Image()
@@ -31,19 +32,8 @@ class CharPage:
         self.__root.grid(column=0, row=1, sticky=tk.NSEW)
 
         # #################### BEGIN CHARACTER LIST ####################
-        listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])
-        charlist = os.listdir(self.workDir.get() + "/Characters")
-        charlist.remove('Images')
-
-        if len(charlist) == 0:
-            tk.Label(listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
-        else:
-            for c in charlist:
-                l = tk.Label(listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
-                l.pack(pady=1, fill=tk.X, padx=5)
-                l.bind('<Button-1>', lambda event, charFile=c: self.redirect(charFile))
-
-        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        self.listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])
+        self.listChars()
         # #################### END CHARACTER LIST ####################
 
         # #################### BEGIN CHARACTER FORM ####################
@@ -54,7 +44,7 @@ class CharPage:
         f_img = tk.LabelFrame(f_header, background=self.colors['bg1'])
         self.can = tk.Canvas(f_img, width=100, height=100)
         self.can.config(background=self.colors['bg1'], highlightbackground=self.colors['bg1'])
-        self.can.bind('<Button-1>', self.__openPicture)
+        self.can.bind('<Button-1>', lambda event: self.__openPicture())
         self.can.pack()
         f_img.grid(column=0, row=0, padx=5, pady=5)
         tk.Label(f_header2, text="Name:", background=self.colors['bg1']).grid(column=0, row=0, sticky=tk.W)
@@ -89,20 +79,35 @@ class CharPage:
         self.createPage()
         # #################### BEGIN CHARACTER FORM ####################
 
+    def listChars(self):
+        self.listFrame.destroy()
+        self.listFrame = tk.LabelFrame(self.__root, text='Characters', background=self.colors['bg1'])
+        charList = os.listdir(self.workDir.get() + "/Characters")
+        charList.remove('Images')
+
+        if len(charList) == 0:
+            tk.Label(self.listFrame, text="No characters founded", bg=self.colors['bg1']).pack()
+        else:
+            for c in charList:
+                l = tk.Label(self.listFrame, text=c.replace('.yml', '').replace('_', ' ', 99))
+                l.pack(pady=1, fill=tk.X, padx=5)
+                l.bind('<Button-1>', lambda event, charFile=c: self.redirect(charFile))
+
+        self.listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+
     def createPage(self):
         self.eName.config(state=tk.NORMAL)
         self.eAge.config(state=tk.NORMAL)
         self.gender.config(state=tk.NORMAL)
         self.about.config(state=tk.NORMAL)
-        self.can.bind('<Button-1>', self.__openPicture)
+        self.can.bind('<Button-1>', lambda event: self.__openPicture())
         self.bSaveEdit.config(text='Save', command=lambda: self.see(self.save()))
 
     def see(self, charFile):
-        # self.can.focus_get()
         self.createPage()
         self.can.delete('all')
-        # self.can.update()
         self.load(charFile)
+        self.listChars()
         self.eName.config(state=tk.DISABLED)
         self.eAge.config(state=tk.DISABLED)
         self.gender.config(state=tk.DISABLED)
@@ -110,18 +115,20 @@ class CharPage:
         self.can.unbind('<Button-1>')
         if self.photoFile.get():
             self.can.bind('<Button-1>', lambda event: self.openFull())
-            self.photo = tk.PhotoImage(file=self.workDir.get()+'/Characters/Images/'+charFile.replace('.yml', '.png'))
+            self.photo = tk.PhotoImage(
+                file=self.workDir.get() + '/Characters/Images/' + charFile.replace('.yml', '.png'))
             self.can.create_image(0, 0, anchor=tk.NW, image=self.photo)
             # self.can.update()
 
         self.bSaveEdit.config(text='Edit', command=self.createPage)
 
     def load(self, charFile):
-        file = open(self.workDir.get()+'/Characters/'+charFile, mode='r')
+        file = open(self.workDir.get() + '/Characters/' + charFile, mode='r')
         char = yaml.load(file, yaml.FullLoader)
         file.close()
 
         self.name.set(char['name'])
+        self.prevName.set(self.name.get())
         self.age.set(char['age'])
         self.gender.current(self.genders.index(char['gender']))
         self.photoFile.set(char['photoFile'])
@@ -130,7 +137,7 @@ class CharPage:
     def save(self):
         if self.name.get() == '':
             return
-
+        self.renameFile()
         data = {
             'name': self.name.get(),
             'gender': self.gender.get(),
@@ -143,17 +150,28 @@ class CharPage:
         file = open(self.workDir.get() + '/Characters/' + str(fileName), 'w')
         file.write(yaml.dump(data, default_flow_style=False))
         file.close()
+        self.prevName.set(self.name.get())
         return fileName
+
+    def renameFile(self):
+        os.rename(self.workDir.get()+'/Characters/'+self.prevName.get().replace(' ', '_', 99)+'.yml',
+                  self.workDir.get()+'/Characters/'+self.name.get().replace(' ', '_', 99)+'.yml')
+        if self.photoFile.get():
+            os.rename(self.workDir.get()+'/Characters/Images/'+self.prevName.get().replace(' ', '_', 99)+'.png',
+                      self.workDir.get()+'/Characters/Images/'+self.name.get().replace(' ', '_', 99)+'.png')
+            os.rename(self.workDir.get()+'/Characters/Images/'+self.prevName.get().replace(' ', '_', 99)+'_FULL.png',
+                      self.workDir.get()+'/Characters/Images/'+self.name.get().replace(' ', '_', 99)+'_FULL.png')
 
     def redirect(self, charFile):
         self.save()
         self.see(charFile)
 
     def openFull(self):
-        img = Image.open(self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99)+'_FULL.png')
+        img = Image.open(
+            self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99) + '_FULL.png')
         img.show()
 
-    def __openPicture(self, event):
+    def __openPicture(self):
         if self.name.get() == "":
             return
         rep = os.path.abspath(os.getcwd())
@@ -181,8 +199,8 @@ class CharPage:
         self.photo = img.resize((100, 100))
         self.photoFile.set(True)
         self.photo.save(self.workDir.get() + '/Characters/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
-        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Characters/Images/'
-                                    + self.name.get().replace(' ', '_', 99) + '.png')
+        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Characters/Images/' +
+                               self.name.get().replace(' ', '_', 99) + '.png')
         self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
         self.can.update()
 

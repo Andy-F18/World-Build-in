@@ -22,6 +22,7 @@ class LocationPage:
 
         # #################### BEGIN INIT VARS ####################
         self.name = tk.StringVar()
+        self.prevName = tk.StringVar()
         self.photoFile = tk.BooleanVar()
         self.photoFile.set(False)
         self.fatherLoc = ttk.Combobox(values=self.locations)
@@ -32,16 +33,8 @@ class LocationPage:
         self.__root.grid(column=0, row=1, sticky=tk.NSEW)
 
         # #################### BEGIN LOCATIONS LIST ####################
-        listFrame = tk.LabelFrame(self.__root, text='Locations', background=self.colors['bg1'])
-        if len(self.locations) == 0:
-            tk.Label(listFrame, text="No locations founded", bg=self.colors['bg1']).pack()
-        else:
-            for loc in self.locations:
-                l = tk.Label(listFrame, text=loc)
-                l.pack(pady=1, fill=tk.X, padx=5)
-                l.bind('<Button-1>', lambda event, locFile=loc: self.redirect(locFile.replace(' ', '_', 99)+'.yml'))
-
-        listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+        self.listFrame = tk.LabelFrame(self.__root, text='Locations', background=self.colors['bg1'])
+        self.listLocs()
         # #################### END LOCATIONS LIST ####################
 
         # #################### BEGIN LOCATIONS FORM ####################
@@ -53,7 +46,7 @@ class LocationPage:
         f_img = tk.LabelFrame(f_header, background=self.colors['bg1'])
         self.can = tk.Canvas(f_img, width=100, height=100)
         self.can.config(background=self.colors['bg1'], highlightbackground=self.colors['bg1'])
-        self.can.bind('<Button-1>', self.__openPicture)
+        self.can.bind('<Button-1>', lambda event: self.__openPicture())
         self.can.pack()
         f_img.grid(column=0, row=0, pady=5, padx=5)
 
@@ -86,23 +79,37 @@ class LocationPage:
         # #################### END LOCATIONS FORM ####################
         self.createPage()
 
+    def listLocs(self):
+        self.listFrame.destroy()
+        self.listFrame = tk.LabelFrame(self.__root, text='Locations', background=self.colors['bg1'])
+        if len(self.locations) == 0:
+            tk.Label(self.listFrame, text="No locations founded", bg=self.colors['bg1']).pack()
+        else:
+            for loc in self.locations:
+                l = tk.Label(self.listFrame, text=loc)
+                l.pack(pady=1, fill=tk.X, padx=5)
+                l.bind('<Button-1>', lambda event, locFile=loc: self.redirect(locFile.replace(' ', '_', 99) + '.yml'))
+
+        self.listFrame.grid(column=0, row=0, sticky=tk.EW, padx=5)
+
     def createPage(self):
         self.eName.config(state=tk.NORMAL)
         self.location.config(state=tk.NORMAL)
         self.location.unbind('<Button-1>')
         self.about.config(state=tk.NORMAL)
-        self.can.bind('<Button-1>', self.__openPicture)
+        self.can.bind('<Button-1>', lambda event: self.__openPicture())
         self.bSaveEdit.config(text='Save', command=lambda: self.see(self.save()))
 
     def see(self, locFile):
         self.createPage()
         self.load(locFile)
+        self.listLocs()
 
         self.eName.config(state=tk.DISABLED)
         self.location.config(state=tk.DISABLED)
         if self.location.get() != '':
             self.location.bind('<Button-1>',
-                               lambda event, loc=self.location.get(): self.redirect(loc.replace(' ', '_', 99) + '.yml'))
+                               lambda event, l=self.location.get(): self.redirect(l.replace(' ', '_', 99) + '.yml'))
         self.about.config(state=tk.DISABLED)
         self.can.unbind('<Button-1>')
         self.bSaveEdit.config(text='Edit', command=self.createPage)
@@ -115,6 +122,7 @@ class LocationPage:
         self.f_places.destroy()
         self.f_places = tk.LabelFrame(self.f_form, text='Places', background=self.colors['bg1'])
         self.places = []
+
         for loc in self.locations:
             file = open(self.workDir.get() + '/Locations/' + loc.replace(' ', '_', 99) + '.yml', 'r')
             place = yaml.load(file, yaml.FullLoader)
@@ -132,17 +140,28 @@ class LocationPage:
         file.close()
 
         self.name.set(loc['name'])
+        self.prevName.set(self.name.get())
         if loc['location'] != '':
-            self.location.current(self.locations.index(loc['location']))
+            try:
+                self.location.current(self.locations.index(loc['location']))
+            except ValueError:
+                self.location.set('')
         else:
             self.location.set('')
         self.photoFile.set(loc['photoFile'])
         self.about.replace(0.0, tk.END, loc['about'])
 
+        self.locations = []
+        for l in os.listdir(self.workDir.get() + '/Locations'):
+            self.locations.append(l.replace('.yml', '').replace('_', ' ', 99))
+
+        self.locations.remove('Images')
+
     def save(self):
         if self.name.get() == '':
             return
 
+        self.renameFile()
         data = {
             'name': self.name.get(),
             'location': self.location.get(),
@@ -154,7 +173,18 @@ class LocationPage:
         file = open(self.workDir.get() + '/Locations/' + fileName, mode='w')
         file.write(yaml.dump(data, default_flow_style=False))
         file.close()
+        self.prevName.set(self.name.get())
         return fileName
+
+    def renameFile(self):
+        os.rename(self.workDir.get() + '/Locations/' + self.prevName.get().replace(' ', '_', 99) + '.yml',
+                  self.workDir.get() + '/Locations/' + self.name.get().replace(' ', '_', 99) + '.yml')
+        if self.photoFile.get():
+            os.rename(self.workDir.get() + '/Locations/Images/' + self.prevName.get().replace(' ', '_', 99) + '.png',
+                      self.workDir.get() + '/Locations/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
+            os.rename(self.workDir.get() + '/Locations/Images/' +
+                      self.prevName.get().replace(' ', '_', 99) + '_FULL.png',
+                      self.workDir.get() + '/Locations/Images/' + self.name.get().replace(' ', '_', 99) + '_FULL.png')
 
     def redirect(self, locFile):
         self.save()
@@ -164,7 +194,7 @@ class LocationPage:
         img = Image.open(self.workDir.get() + '/Locations/Images/' + self.name.get().replace(' ', '_', 99)+'_FULL.png')
         img.show()
 
-    def __openPicture(self, event):
+    def __openPicture(self):
         if self.name.get() == "":
             return
         rep = os.path.abspath(os.getcwd())
@@ -191,8 +221,8 @@ class LocationPage:
         self.photo = img.resize((100, 100))
         self.photoFile.set(True)
         self.photo.save(self.workDir.get() + '/Locations/Images/' + self.name.get().replace(' ', '_', 99) + '.png')
-        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Locations/Images/'
-                                    + self.name.get().replace(' ', '_', 99) + '.png')
+        imgCan = tk.PhotoImage(file=self.workDir.get() + '/Locations/Images/' +
+                               self.name.get().replace(' ', '_', 99) + '.png')
         self.can.create_image(0, 0, anchor=tk.NW, image=imgCan)
         self.can.update()
 
