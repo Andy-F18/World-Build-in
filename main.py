@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 from tkinter import filedialog
+from tkinter import messagebox
 
 import yaml
 from docx import Document
@@ -37,7 +38,7 @@ class WorldBuildIn:
 
         self.__menu_p()
         self.__menu_h()
-        self.__currentFrame = tk.Frame(self.__root)
+        self.__currentFrame = None
         # self.__currentFrame.pack()
 
         self.worldName = tk.StringVar()
@@ -53,7 +54,7 @@ class WorldBuildIn:
         fileMenu = tk.Menu(menu, tearoff=0, activebackground=self.colors['menu1'])
         fileMenu.add_command(label='New world', command=self.__new)
         fileMenu.add_command(label='Open world', command=self.__open)
-        # fileMenu.add_command(label='Save')
+        # fileMenu.add_command(label='Save', command=self.message)
         # fileMenu.add_command(label='Save as')
         fileMenu.add_command(label='Export to Docx', command=self.exportDocx)
         fileMenu.add_separator()
@@ -163,13 +164,19 @@ class WorldBuildIn:
 
     def __addChar(self):
         if self.worldName.get() == '':
+            self.warning('Add character', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['bg1'])
         self.b_place.config(background=self.colors['menu1'])
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
+        try:
+            self.__currentFrame.save()
+            self.__currentFrame.destroy()
+        except AttributeError:
+            pass
+
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
         charP = Chp.CharPage(self, frame, self.colors, self.workDir)
@@ -179,13 +186,18 @@ class WorldBuildIn:
 
     def charPage(self, char=None):
         if self.worldName.get() == '':
+            self.warning('Character', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['bg1'])
         self.b_place.config(background=self.colors['menu1'])
         self.b_items.config(background=self.colors['menu1'])
         self.b_story.config(background=self.colors['menu1'])
 
-        self.__currentFrame.destroy()
+        try:
+            self.__currentFrame.save()
+            self.__currentFrame.destroy()
+        except AttributeError:
+            pass
         frame = tk.Frame(self.__root, background=self.colors['bg1'])
 
         charList = os.listdir(self.workDir.get() + "/Characters")
@@ -205,6 +217,7 @@ class WorldBuildIn:
 
     def __addLoc(self):
         if self.worldName.get() == '':
+            self.warning('Add location', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['bg1'])
@@ -222,6 +235,7 @@ class WorldBuildIn:
 
     def locPage(self, loc=None):
         if self.worldName.get() == '':
+            self.warning('Locations', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['bg1'])
@@ -248,6 +262,7 @@ class WorldBuildIn:
 
     def __addItem(self):
         if self.worldName.get() == '':
+            self.warning('Add item', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['menu1'])
@@ -265,6 +280,7 @@ class WorldBuildIn:
 
     def itemPage(self, item=None):
         if self.worldName.get() == '':
+            self.warning('Items', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['menu1'])
@@ -290,6 +306,7 @@ class WorldBuildIn:
 
     def __addStory(self):
         if self.worldName.get() == '':
+            self.warning('Add chapter', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['menu1'])
@@ -306,6 +323,7 @@ class WorldBuildIn:
 
     def storyPage(self, story=None):
         if self.worldName.get() == '':
+            self.warning('Story', 'Open/Create a world before.')
             return
         self.b_chara.config(background=self.colors['menu1'])
         self.b_place.config(background=self.colors['menu1'])
@@ -343,6 +361,7 @@ class WorldBuildIn:
 
     def exportDocx(self):
         if self.worldName.get() == '':
+            self.warning('Export to docx', 'Open/Create a world before.')
             return
 
         doc = Document()
@@ -470,6 +489,13 @@ class WorldBuildIn:
         # #################### END Story ####################
 
         doc.save(self.workDir.get()+"/"+self.worldName.get().replace(' ', '_', 99)+'.docx')
+        self.message('Exportation', 'Exportation successful!')
+
+    def warning(self, title, msg):
+        messagebox.showwarning(title, msg)
+
+    def message(self, title, msg):
+        messagebox.showinfo(title, msg)
 
 
 if __name__ == '__main__':
